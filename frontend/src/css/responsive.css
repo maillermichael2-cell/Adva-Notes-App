@@ -1,0 +1,57 @@
+/* responsive .css  */
+
+/* breakpoints  */
+
+/* 600px
+768px
+992px
+1200px */
+
+
+@media only screen and (min-width:600px){
+
+}
+
+@media only screen and (min-width:768px){
+  .landingPage {
+    padding: 4rem 1.5rem;
+  }
+  
+  .landingPage h1 {
+    font-size: 2.75rem;
+    letter-spacing: -0.04em;
+  }
+  
+  .landingPage p {
+    margin-bottom: 3.5rem;
+  }
+  
+  /* Smoothly collapses columns to single file layout on tablets/mobiles */
+  .info {
+    flex: 1 1 100%; 
+    padding: 2.5rem 2rem;
+  }
+
+  .add {
+    padding: 4rem 1.5rem;
+  }
+  
+  .add h1 {
+    font-size: 2.25rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  .addForm {
+    gap: 1.75rem;
+  }
+
+
+}
+
+@media only screen and (min-width:992px){
+
+}
+
+@media only screen and (min-width:1200px){
+    
+}

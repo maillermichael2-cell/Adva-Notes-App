@@ -1,0 +1,12 @@
+# Frontend Exclusions
+node_modules/
+dist/
+.env
+
+# Backend Exclusions
+__pycache__/
+*.pyc
+db.sqlite3
+.venv/
+venv/
+env/

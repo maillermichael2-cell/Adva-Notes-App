@@ -1,0 +1,590 @@
+/* :root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: white;
+  background-color: black;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+} */
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;padding: 0%;
+}
+*{transition: 0.50s;}
+
+/* 1. Global Reset & Sci-Fi Monochrome Variables */
+:root {
+  --bg-dark: #050505;
+  --bg-card: #0d0d0d;
+  --bg-card-hover: #121212;
+  --text-glow: #ffffff;
+  --text-muted: #888888;
+  --border-fine: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(255, 255, 255, 0.85);
+  --laser-accent: #ffffff;
+  --font-futuristic: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --transition-matrix: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  line-height: 1.5;
+}
+
+/* 2. Main Wrapper Layout (Deep Cosmic Canvas) */
+.landingPage {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  background-color: var(--bg-dark);
+  color: var(--text-glow);
+  font-family: var(--font-futuristic);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 3. High-End Fine Typography & Headers */
+.landingPage h1 {
+  font-size: 4rem;
+  font-weight: 200; /* Ultra-fine weight */
+  letter-spacing: -0.06em;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #ffffff 40%, #555555 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.landingPage p {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 5rem;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Tech indicator dot before paragraph text */
+.landingPage p::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: var(--laser-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--text-glow);
+}
+
+/* 4. Flexbox Container */
+.data {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* 5. Futuristic Info Card Design (Flex Children) */
+.info {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-fine);
+  padding: 2rem 1rem 2rem 1rem;
+  
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  
+  /* Dynamic 3-column layout basis */
+  flex: 1 1 calc(33.333% - 1rem); 
+  min-width: 300px; 
+  
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-matrix);
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+}
+
+/* ==========================================================================
+   FULL NOTE READER SHEET VIEW STYLES
+   ========================================================================== */
+
+/* Resets default link layouts on card text wrappers */
+.cardContentLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  flex: 1; /* Maximizes clickable surface area inside the box card background */
+}
+
+.fullNoteContainer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 3rem;
+  margin-top: 1rem;
+}
+
+.techMeta {
+  font-family: monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  color: #666666;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.fullNoteHeader h1 {
+  margin-bottom: 3rem !important;
+}
+
+/* Renders your infinite description data cleanly with cinematic breathing space */
+.fullNoteBody {
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: #cccccc;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  white-space: pre-wrap; /* Crucial: Preserves any user line breaks or paragraphs */
+  max-width: 800px;
+  word-break: break-word; /* Prevents overflow on long unbroken strings */
+  overflow-wrap: break-word; /* Ensures text wraps properly in all browsers */
+}
+
+.cardBtn{
+  flex:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.75rem;
+  font-weight:300;
+  letter-spacing:0.1em;
+  text-transform:uppercase;text-decoration:none;
+  padding:0.5rem 1rem;background-color:transparent;
+  cursor: pointer;
+  transition: var(--transition-matrix);
+
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5);}
+
+.cardActions{
+  display:flex;
+  gap:1rem;
+  margin-top:0px;
+  border-top:1px solid rgba(255,255,255,0.05);
+  padding-top:4px;
+  flex-direction:column;
+  height: 100%;
+}
+
+.editBtn{
+  color:var(--text-glow);
+  border-color: 1px solid var(--border-fine);
+  border: 1px solid var(--border-fine);border-radius: 5px;
+}
+
+.editBtn:hover{
+  background-color: var(--text-glow);
+  color: var(--bg-dark);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+.deleteBtn{
+  color: #ff3b3b;
+  border-color: 1px solid var(--border-fine);
+  border: 1px solid var(--border-fine);border-radius: 5px;
+}
+
+/* Sub-pixel tech accent line on top of each card */
+.info::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 15px;
+  height: 1px;
+  background-color: var(--laser-accent);
+  transition: var(--transition-matrix);
+}
+
+/* Animated Border Glow Overlay */
+.info::after {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px; right: -1px; bottom: -1px;
+  border: 1px solid var(--border-glow);
+  opacity: 0;
+  transition: var(--transition-matrix);
+  pointer-events: none;
+}
+
+/* Hover States: Subtle vertical slide & technical border activation */
+.info:hover {
+  transform: translateY(-8px);
+  background-color: var(--bg-card-hover);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+}
+
+.info:hover::before {
+  width: 100%;
+}
+
+.info:hover::after {
+  opacity: 1;
+}
+
+/* 6. Card Inner Content Fine Typography */
+.info .name {
+  font-size: 1.5rem;
+  font-weight: 300; /* Super fine technical weight */
+  color: var(--text-glow);
+  letter-spacing: -0.03em;
+  margin-bottom: 1.25rem;
+}
+
+.info .description {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  font-weight: 300;
+  letter-spacing: 0.01em;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  -webkit-line-clamp: 1; /* Limit to 3 lines */
+  text-overflow: ellipsis; /* Add ellipsis for overflow */
+  line-clamp: 1; /* For non-webkit browsers */
+  word-break: break-word; /* Prevents overflow on long unbroken strings */
+  overflow-wrap: break-word; /* Ensures text wraps properly in all browsers */
+}
+
+/* ==========================================================================
+   FUTURISTIC EMPTY STATE TEMPLATE
+   ========================================================================== */
+
+.emptyStateCard {
+  /* Spans across full width of your flex wrapper rows */
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  background-color: var(--bg-card, #0d0d0d);
+  border: 1px dashed rgba(255, 255, 255, 0.15); /* Tech dashed boundary style */
+  padding: 5rem 2rem;
+  box-sizing: border-box;
+  text-align: center;
+  animation: pulseFine 3s ease-in-out infinite 0s; /* Subtle breathing pulse animation */
+  transition: var(--transition-matrix);
+  border-radius: 8px;
+}
+
+.emptyStateIcon {
+  font-family: monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: var(--text-muted, #888888);
+  margin-bottom: 1.5rem;
+}
+
+.emptyStateTitle {
+  font-size: 1.75rem;
+  font-weight: 200; /* Fine typography weighting */
+  letter-spacing: -0.02em;
+  color: var(--text-glow, #ffffff);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.emptyStateText {
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--text-muted, #666666) !important;
+  margin-bottom: 0 !important;
+  border-left: none !important;
+  padding-left: 0 !important;
+}
+
+/* Subtle futuristic breathing pulse animation loop */
+@keyframes pulseFine {
+  0% { border-color: rgba(255, 255, 255, 0.1);opacity: 0.85; }
+  50% { border-color: rgba(255, 255, 255, 0.2);opacity: 1; }
+  100% { border-color: rgba(255, 255, 255, 0.1);opacity: 0.85; }
+}
+
+
+/* 8. Futuristic Action Link Button */
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Fine Typography matching your theme */
+  font-size: 0.85rem;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  
+  /* Minimalist Technical Border Style */
+  color: var(--text-glow);
+  background-color: transparent;
+  border: 1px solid var(--border-fine);
+  padding: 0.75rem 2rem;
+  margin-bottom: 3rem;
+  
+  position: relative;
+  cursor: pointer;
+  transition: var(--transition-matrix);
+}
+
+/* Hover State: Inverts color sharply and glows */
+.actionButton:hover {
+  background-color: var(--text-glow);
+  color: var(--bg-dark);
+  border-color: var(--text-glow);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* 1. Global Form Layout Configuration */
+.add {
+  width: 100%;
+  margin: 0 auto;
+  padding: 6rem 2rem;
+  background-color: var(--bg-dark, #050505);
+  color: var(--text-glow, #ffffff);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 2. High-End Fine Typography Header */
+.add h1 {
+  font-size: 3rem;
+  font-weight: 200; /* Ultra-fine weight matching landing page */
+  letter-spacing: -0.05em;
+  margin-bottom: 4rem;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #ffffff 40%, #555555 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* ==========================================================================
+   DISTRUCTION-FREE PLAIN WRITING PAGE STYLES
+   ========================================================================== */
+
+/* Top Action Header Bar */
+.documentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto 3rem auto;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 1rem;
+}
+
+/* Make the back/cancel link look like a clean interface utility */
+.documentHeader .link {
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  color: #666666;
+  transition: color 0.2s ease;
+}
+
+.documentHeader .link:hover {
+  color: #ffffff;
+}
+
+/* Sleek Action Trigger Button on top right */
+.saveDocumentBtn {
+  background-color: #ffffff;
+  color: #050505;
+  border: 1px solid #ffffff;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveDocumentBtn:hover {
+  background-color: #e5e5e5;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Centered Document Sheet Box Container */
+.documentWorkspace {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Stripping the Title Box down to standard plain text spacing */
+.plainTitleInput {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  font-size: 2.5rem !important;
+  font-weight: 200 !important; /* Fine font weight */
+  color: #ffffff !important;
+  letter-spacing: -0.04em !important;
+  margin-bottom: 2rem;
+  width: 100%;
+  outline: none;
+}
+
+.plainTitleInput::placeholder {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+/* Creating the infinite text document typing effect */
+.plainTextArea {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  font-size: 1.15rem !important;
+  line-height: 1.8 !important;
+  font-weight: 300 !important;
+  color: #cccccc !important;
+  width: 100%;
+  min-height: 60vh !important; /* Forces textarea to expand down the page */
+  outline: none;
+  resize: none; /* Disables the manual drag handle on bottom right corner */
+  
+  /* Hides default browser scrollbars for a clean look */
+  scrollbar-width: none; /* Firefox */
+}
+
+.plainTextArea::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+.plainTextArea::placeholder {
+  color: #444444;
+}
+
+
+/* 3. Flexbox Form Architecture */
+.addForm {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+
+/* 4. Fine Futuristic Input Labels */
+.addForm label {
+  font-size: 0.8rem;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted, #888888);
+  margin-bottom: -1rem; /* Pull label visually closer to its input */
+}
+
+/* 5. Minimalist Tech Input & Textarea Fields */
+.addForm input[type="text"],
+.addForm textarea {
+  background-color: var(--bg-card, #0d0d0d);
+  border: 1px solid var(--border-fine, rgba(255, 255, 255, 0.08));
+  padding: 1rem 1.25rem;
+  color: var(--text-glow, #ffffff);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 300;
+  border-radius: 0; /* Keeps sharp tech angles */
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+/* Custom height setting specifically for the description field */
+.addForm textarea {
+  min-height: 140px;
+  resize: vertical; /* Allows resizing only vertically to preserve layout width */
+}
+
+/* Interactive Laser Focus State */
+.addForm input[type="text"]:focus,
+.addForm textarea:focus {
+  background-color: var(--bg-card-hover, #121212);
+  border-color: var(--border-glow, rgba(255, 255, 255, 0.85));
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+/* 6. Glowing Technical Action Button */
+.addForm button[type="submit"] {
+  margin-top: 1.5rem;
+  padding: 1rem 2rem;
+  background-color: transparent;
+  border: 1px solid var(--border-fine, rgba(255, 255, 255, 0.08));
+  color: var(--text-glow, #ffffff);
+  
+  font-size: 0.85rem;
+  font-weight: bolder;
+  border-radius: 5px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hover State: Inverts layout to high-contrast crisp white with shadow glow */
+.addForm button[type="submit"]:hover {
+  background-color: var(--text-glow, #ffffff);
+  color: var(--bg-dark, #050505);
+  border-color: var(--text-glow, #ffffff);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+/* 8. Additional Technical Feedback States */
+.error-message {
+  font-size: 0.85rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: #ff3b3b;
+  border-left: 2px solid #ff3b3b;
+  padding-left: 1rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+}
+
+/* Dim styling for fields while the API call is in progress */
+.addForm input:disabled,
+.addForm textarea:disabled,
+.addForm button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 7. Responsive 768px Mobile Scaling Rules */
+@media (max-width: 768px) {
+}
+
+
+
+
