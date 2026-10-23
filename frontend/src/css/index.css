@@ -53,7 +53,10 @@ body {
   min-height: 100vh;
   box-sizing: border-box;
 }
-
+.tools{
+  display: flex;flex-direction: column;justify-content: space-around;align-items: start;
+  gap: 10px;
+}
 /* 3. High-End Fine Typography & Headers */
 .landingPage h1 {
   font-size: 4rem;
@@ -488,6 +491,214 @@ body {
   color: #444444;
 }
 
+/* QR-based user connections */
+.connectPage .connectHeader,
+.connectSectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.connectPage .connectHeader {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid var(--border-fine);
+  padding-bottom: 2rem;
+}
+
+.connectPage .connectHeader h1 {
+  margin: 1.5rem 0 0.5rem;
+}
+
+.connectPage .connectHeader p,
+.connectPanel p {
+  margin-bottom: 1.5rem;
+}
+
+.connectBackLink,
+.connectLogoutButton {
+  margin-bottom: 0;
+}
+
+.connectPage .connectWelcome {
+  margin-bottom: 2rem;
+}
+
+.connectWelcome h2,
+.connectPanel h2 {
+  margin: 0.5rem 0 1rem;
+  color: var(--text-glow);
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.connectUsername,
+.connectListItem small {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.connectGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.connectPanel {
+  min-width: 0;
+  padding: 2rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-fine);
+  border-radius: 8px;
+}
+
+.connectPanel .actionButton {
+  margin: 0.5rem 0 0;
+}
+
+.connectOAuthForm {
+  margin: 0;
+}
+
+.connectOAuthForm .actionButton {
+  margin-bottom: 0;
+}
+
+.connectQrFrame {
+  display: grid;
+  width: fit-content;
+  margin: 1.5rem auto;
+  padding: 0.75rem;
+  background: #fff;
+  border-radius: 6px;
+}
+
+.connectScanner {
+  max-width: 100%;
+  margin-top: 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--border-fine);
+  border-radius: 6px;
+}
+
+.connectScanner video {
+  max-width: 100%;
+}
+
+.connectManualForm {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.connectManualForm label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.connectManualForm input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0.75rem;
+  color: var(--text-glow);
+  background: var(--bg-dark);
+  border: 1px solid var(--border-fine);
+  border-radius: 4px;
+}
+
+.connectManualForm .actionButton {
+  justify-self: start;
+}
+
+.connectConnections {
+  margin-top: 3rem;
+}
+
+.connectSectionHeading {
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+}
+
+.connectCount {
+  display: grid;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  color: var(--bg-dark);
+  background: var(--text-glow);
+  border-radius: 50%;
+  font-size: 0.8rem;
+}
+
+.connectList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.connectListItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-fine);
+  border-radius: 8px;
+}
+
+.connectListItem > span:last-child {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.connectListItem strong {
+  overflow: hidden;
+  color: var(--text-glow);
+  font-weight: 400;
+  text-overflow: ellipsis;
+}
+
+.connectAvatar {
+  display: grid;
+  flex: 0 0 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  color: var(--bg-dark);
+  background: var(--text-glow);
+  border-radius: 50%;
+}
+
+.connectNotice {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border-fine);
+  border-radius: 6px;
+}
+
+.connectError {
+  color: #ff9b9b;
+  border-color: rgba(255, 59, 59, 0.45);
+}
+
+.connectSuccess {
+  color: #c8f7d1;
+  border-color: rgba(100, 220, 130, 0.4);
+}
+
+.connectErrorText,
+.connectSetupHint {
+  color: #ff9b9b !important;
+  overflow-wrap: anywhere;
+}
 
 /* 3. Flexbox Form Architecture */
 .addForm {
@@ -584,7 +795,5 @@ body {
 /* 7. Responsive 768px Mobile Scaling Rules */
 @media (max-width: 768px) {
 }
-
-
 
 

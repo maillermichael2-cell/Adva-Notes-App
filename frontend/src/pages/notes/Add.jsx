@@ -66,7 +66,7 @@ const Add = () => {
             const result = await response.json(); 
             console.log(`Successfully updated in Django via ${apiMethod}:`, result);
 
-            navigate('/'); 
+            navigate('/note'); 
 
         } catch (err) {
             setError(err.message);
@@ -85,7 +85,7 @@ const Add = () => {
             {/* Dynamic Header Label adjustments */}
             <h1>{isEditMode ? 'Modify Notes Details' : 'Add New Notes'}</h1>
 
-            <Link to="/" className="link">
+            <Link to="/note" className="link">
                 Home
             </Link>
             

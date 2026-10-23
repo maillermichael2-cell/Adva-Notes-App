@@ -11,16 +11,24 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+
+from decouple import Config, RepositoryEnv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+ENV_FILE = BASE_DIR / '.env'
+env = Config(RepositoryEnv(str(ENV_FILE))) if ENV_FILE.is_file() else Config(os.environ)
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-va$o_+0!5g1-0+8q_he&&&(4esbn13#96&014ta+8ho^ha&4@1'
+SECRET_KEY = env(
+    'DJANGO_SECRET_KEY',
+    default='django-insecure-va$o_+0!5g1-0+8q_he&&&(4esbn13#96&014ta+8ho^ha&4@1',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,10 +45,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'rest_framework.authtoken',
     'corsheaders',
     'rest_framework',
     'organization',
+    'courses',
+    'chat',
+    'connect',
 ]
 
 REST_FRAMEWORK = {
@@ -58,6 +74,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
+]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 ROOT_URLCONF = 'OS.urls'
@@ -139,6 +161,33 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+SITE_ID = 1
+
+FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:3000').rstrip('/')
+FRONTEND_AUTH_REDIRECT_URL = env(
+    'FRONTEND_AUTH_REDIRECT_URL',
+    default=f'{FRONTEND_URL}/connect',
+)
+LOGIN_REDIRECT_URL = FRONTEND_AUTH_REDIRECT_URL
+LOGOUT_REDIRECT_URL = FRONTEND_URL
+
+GOOGLE_CLIENT_ID = env('GOOGLE_CLIENT_ID', default='')
+GOOGLE_CLIENT_SECRET = env('GOOGLE_CLIENT_SECRET', default='')
+GOOGLE_OAUTH_CONFIGURED = bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APPS': [{
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret': GOOGLE_CLIENT_SECRET,
+            'key': '',
+        }],
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'prompt': 'select_account'},
+    },
+}
+
+CONNECT_QR_TOKEN_MAX_AGE_SECONDS = 300
 
 # CORS ALLOWED ORIGINS
 CORS_ALLOWED_ORIGINS = [
@@ -147,3 +196,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
 ]
+CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()

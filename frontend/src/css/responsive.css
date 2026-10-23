@@ -55,3 +55,25 @@
 @media only screen and (min-width:1200px){
     
 }
+
+@media only screen and (max-width:767px){
+  .connectPage {
+    padding: 2.5rem 1rem;
+  }
+
+  .connectPage .connectHeader {
+    align-items: flex-start;
+  }
+
+  .connectPage .connectHeader h1 {
+    font-size: 2.5rem;
+  }
+
+  .connectGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .connectPanel {
+    padding: 1.5rem;
+  }
+}

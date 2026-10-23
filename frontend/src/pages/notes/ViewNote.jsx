@@ -28,7 +28,7 @@ const ViewNote = () => {
     return (
         <div className="landingPage">
             {/* Fine line link to fly back home safely */}
-            <Link to="/" className="actionButton" style={{ marginBottom: '3rem' }}>
+            <Link to="/note" className="actionButton" style={{ marginBottom: '3rem' }}>
                 &larr; Back to Dashboard
             </Link>
 

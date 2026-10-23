@@ -1,8 +1,8 @@
-from .views import OrganizationViews, OrganizationEdit
+from .views import NotesViews, NotesEdit
 from rest_framework.urls import path
 
 
 urlpatterns = [
-    path('notes/', OrganizationViews.as_view(), name='org'),
-    path('notes/<int:pk>/', OrganizationEdit.as_view(), name='orgedt')
+    path('notes/', NotesViews.as_view(), name='org'),
+    path('notes/<int:pk>/', NotesEdit.as_view(), name='orgedt')
 ]
