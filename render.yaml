@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: api-practice-backend
+    name: adva-tools-backend
     runtime: python
     plan: free
     rootDir: backend
