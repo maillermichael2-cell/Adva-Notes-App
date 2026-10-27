@@ -1,9 +1,11 @@
 from urllib.parse import parse_qs, urlparse
+from unittest.mock import PropertyMock, patch
 
 from django.contrib.auth import get_user_model
 from django.core import signing
 from django.test import Client, TestCase, override_settings
 from rest_framework.test import APIClient
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Connection
@@ -178,7 +180,8 @@ class ConnectionApiTests(TestCase):
         client = APIClient()
         client.cookies['refresh_token'] = refresh_token
 
-        response = client.post('/api/V1/connect/token/refresh/')
+        with self.assertNumQueries(0):
+            response = client.post('/api/V1/connect/token/refresh/')
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.data['access'])
@@ -187,6 +190,27 @@ class ConnectionApiTests(TestCase):
     def test_refresh_endpoint_rejects_and_clears_invalid_cookie(self):
         client = APIClient()
         client.cookies['refresh_token'] = 'invalid'
+
+        response = client.post('/api/V1/connect/token/refresh/')
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(
+            response.data['detail'],
+            'Refresh token is invalid or expired.',
+        )
+        self.assertEqual(response.cookies['refresh_token'].value, '')
+
+    @patch('connect.views.RefreshToken')
+    def test_refresh_endpoint_handles_access_token_generation_error(
+        self,
+        refresh_token_class,
+    ):
+        refresh_token = refresh_token_class.return_value
+        type(refresh_token).access_token = PropertyMock(
+            side_effect=TokenError('invalid refresh token')
+        )
+        client = APIClient()
+        client.cookies['refresh_token'] = 'valid-looking-token'
 
         response = client.post('/api/V1/connect/token/refresh/')
 

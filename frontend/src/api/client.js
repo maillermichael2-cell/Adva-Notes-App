@@ -71,6 +71,10 @@ async function refreshAccessToken() {
                 accessToken = payload.access;
                 return accessToken;
             })
+            .catch((error) => {
+                accessToken = null;
+                throw error;
+            })
             .finally(() => {
                 refreshRequest = null;
             });
