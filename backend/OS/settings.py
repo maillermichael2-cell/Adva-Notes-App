@@ -129,7 +129,8 @@ WSGI_APPLICATION = 'OS.wsgi.application'
 ASGI_APPLICATION = 'OS.asgi.application'
 
 REDIS_URL = env('REDIS_URL', default='')
-if REQUIRE_SHARED_SERVICES and not RUNNING_TESTS and not REDIS_URL:
+REQUIRE_REDIS = env('REQUIRE_REDIS', default=False, cast=bool)
+if REQUIRE_REDIS and not RUNNING_TESTS and not REDIS_URL:
     raise ImproperlyConfigured(
         'REDIS_URL must be configured for production chat delivery.'
     )

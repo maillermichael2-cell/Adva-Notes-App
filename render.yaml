@@ -13,9 +13,9 @@ services:
         value: "False"
       - key: REQUIRE_SHARED_SERVICES
         value: "True"
+      - key: REQUIRE_REDIS
+        value: "False"
       - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
         sync: false
       - key: FRONTEND_URL
         value: https://adva-tools.onrender.com
