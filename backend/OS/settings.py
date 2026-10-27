@@ -24,11 +24,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = BASE_DIR / '.env'
 env = Config(RepositoryEnv(str(ENV_FILE))) if ENV_FILE.is_file() else Config(os.environ)
 RUNNING_TESTS = 'test' in sys.argv or 'pytest' in sys.modules
-REQUIRE_SHARED_SERVICES = env(
-    'REQUIRE_SHARED_SERVICES',
-    default=False,
-    cast=bool,
-)
 
 
 # Quick-start development settings - unsuitable for production
@@ -154,11 +149,6 @@ else:
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASE_URL = env('DATABASE_URL', default='')
-
-if REQUIRE_SHARED_SERVICES and not RUNNING_TESTS and not DATABASE_URL:
-    raise ImproperlyConfigured(
-        'DATABASE_URL must be configured for production deployments.'
-    )
 
 if RUNNING_TESTS:
     DATABASES = {
