@@ -16,10 +16,10 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .authentication import OptionalJWTAuthentication
 from .models import Connection
 from .serializers import (
     ConnectedUserSerializer,
@@ -34,7 +34,7 @@ QR_TOKEN_SALT = 'connect.user-qr'
 @ensure_csrf_cookie
 @api_view(['GET'])
 @authentication_classes([
-    JWTAuthentication,
+    OptionalJWTAuthentication,
     SessionAuthentication,
 ])
 @permission_classes([AllowAny])

@@ -39,6 +39,15 @@ class ConnectionApiTests(TestCase):
         self.assertTrue(response.data['csrf_token'])
         self.assertIsNone(response.data['user'])
 
+    def test_session_status_treats_invalid_bearer_as_anonymous(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer invalid-token')
+
+        response = self.client.get('/api/V1/connect/session/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.data['authenticated'])
+        self.assertIsNone(response.data['user'])
+
     def test_qr_connect_creates_one_mutual_connection(self):
         token = self.create_qr_token(self.alice)
         self.client.force_authenticate(user=self.bob)
