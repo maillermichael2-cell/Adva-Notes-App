@@ -184,6 +184,19 @@ class ConnectionApiTests(TestCase):
         self.assertTrue(response.data['access'])
         self.assertNotIn('refresh', response.data)
 
+    def test_refresh_endpoint_rejects_and_clears_invalid_cookie(self):
+        client = APIClient()
+        client.cookies['refresh_token'] = 'invalid'
+
+        response = client.post('/api/V1/connect/token/refresh/')
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(
+            response.data['detail'],
+            'Refresh token is invalid or expired.',
+        )
+        self.assertEqual(response.cookies['refresh_token'].value, '')
+
     @override_settings(
         SOCIALACCOUNT_PROVIDERS={
             'google': {

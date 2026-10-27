@@ -17,6 +17,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -84,11 +85,19 @@ def refresh_access_token(request):
         )
 
     serializer = TokenRefreshSerializer(data={'refresh': refresh})
-    if not serializer.is_valid():
-        return Response(
+    try:
+        serializer.is_valid(raise_exception=True)
+    except TokenError:
+        response = Response(
             {'detail': 'Refresh token is invalid or expired.'},
             status=status.HTTP_401_UNAUTHORIZED,
         )
+        response.delete_cookie(
+            settings.JWT_REFRESH_COOKIE_NAME,
+            path=settings.JWT_REFRESH_COOKIE_PATH,
+            samesite=settings.JWT_REFRESH_COOKIE_SAMESITE,
+        )
+        return response
     return Response({'access': serializer.validated_data['access']})
 
 
