@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom'; 
+import { notesApi } from '../../api/client';
 
 const Add = () => {
     // 1. Intercept URL configuration params to detect Mode
@@ -21,11 +22,7 @@ const Add = () => {
 
         const fetchNoteDetails = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/V1/notes/${id}/`);
-                if (!response.ok) {
-                    throw new Error(`Could not locate entry data. Status: ${response.status}`);
-                }
-                const result = await response.json();
+                const result = await notesApi.get(id);
                 setNotes_Name(result.notes_name);
                 setNotes(result.notes);
             } catch (err) {
@@ -46,25 +43,12 @@ const Add = () => {
 
         const payload = { notes_name: notes_name, notes: notes };
         
-        // Dynamically shift endpoint paths and REST action keywords
-        const apiUrl = isEditMode ? `http://localhost:8080/api/V1/notes/${id}/` : 'http://localhost:8080/api/V1/notes/';
-        const apiMethod = isEditMode ? 'PUT' : 'POST';
-
         try {
-            const response = await fetch(apiUrl, {
-                method: apiMethod,
-                headers: {
-                    'Content-Type': 'application/json', 
-                },
-                body: JSON.stringify(payload), 
-            });
-
-            if (!response.ok) {
-                throw new Error(`Server Error: status code ${response.status}`);
+            if (isEditMode) {
+                await notesApi.update(id, payload);
+            } else {
+                await notesApi.create(payload);
             }
-
-            const result = await response.json(); 
-            console.log(`Successfully updated in Django via ${apiMethod}:`, result);
 
             navigate('/note'); 
 

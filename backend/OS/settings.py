@@ -12,13 +12,16 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 
+import dj_database_url
 from decouple import Config, RepositoryEnv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = BASE_DIR / '.env'
 env = Config(RepositoryEnv(str(ENV_FILE))) if ENV_FILE.is_file() else Config(os.environ)
+RUNNING_TESTS = 'test' in sys.argv or 'pytest' in sys.modules
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,13 +30,19 @@ env = Config(RepositoryEnv(str(ENV_FILE))) if ENV_FILE.is_file() else Config(os.
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env(
     'DJANGO_SECRET_KEY',
-    default='django-insecure-va$o_+0!5g1-0+8q_he&&&(4esbn13#96&014ta+8ho^ha&4@1',
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in env(
+        'ALLOWED_HOSTS',
+        default='localhost,127.0.0.1,.onrender.com',
+    ).split(',')
+    if host.strip()
+]
 
 
 # Application definition
@@ -68,6 +77,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -105,23 +115,31 @@ WSGI_APPLICATION = 'OS.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+DATABASE_URL = env('DATABASE_URL', default='')
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'drf_db',
-#         'USER': 'drf_user',
-#         'PASSWORD': 'drf_password',
-#         'HOST': 'db',          # Matches the service name in docker-compose.yml
-#         'PORT': '5432',
-#     }
-# }
+if RUNNING_TESTS:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+elif DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=0,
+            ssl_require=True,
+        )
+    }
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 
@@ -160,6 +178,29 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = env(
+    'SECURE_SSL_REDIRECT',
+    default=not DEBUG and not RUNNING_TESTS,
+    cast=bool,
+)
+SECURE_HSTS_SECONDS = env(
+    'SECURE_HSTS_SECONDS',
+    default=31536000 if not DEBUG and not RUNNING_TESTS else 0,
+    cast=int,
+)
+SESSION_COOKIE_SECURE = not DEBUG and not RUNNING_TESTS
+CSRF_COOKIE_SECURE = not DEBUG and not RUNNING_TESTS
 
 SITE_ID = 1
 
@@ -196,6 +237,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
 ]
-CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys([*CORS_ALLOWED_ORIGINS, FRONTEND_URL]))
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()

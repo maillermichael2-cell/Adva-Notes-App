@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {Link} from 'react-router-dom';
+import { notesApi } from '../../api/client';
 
 const NotePage = () => {
     const [data, setData] = useState([]);
@@ -10,13 +11,7 @@ const NotePage = () => {
         // Define async function inside the useEffect hook
         const fetchData = async () => {
             try{
-                const response = await fetch('http://localhost:8080/api/V1/notes/');
-                
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`)
-                }
-
-                const result = await response.json();
+                const result = await notesApi.list();
                 setData(result); // save the data to state
             } catch (err){
                 setError(err.message); //handles any connection/server errors
@@ -35,13 +30,7 @@ const NotePage = () => {
             return; // Exit if the user cancels the deletion
         }
         try {
-            const response = await fetch(`http://localhost:8080/api/V1/notes/${id}/`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                throw new Error(`DELETE FAILED. status: ${response.status}`);
-            }
+            await notesApi.delete(id);
             // Update the local state to remove the deleted item
             setData(data.filter(item => item.id !== id));
 

@@ -1,66 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Link } from 'react-router-dom';
-
-const API_BASE_URL = (
-    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/V1'
-).replace(/\/+$/, '');
-const BACKEND_ORIGIN = (
-    import.meta.env.VITE_BACKEND_ORIGIN || new URL(API_BASE_URL).origin
-).replace(/\/+$/, '');
-
-async function apiRequest(path, options = {}) {
-    const {
-        body,
-        csrfToken,
-        headers: suppliedHeaders,
-        ...fetchOptions
-    } = options;
-    const headers = new Headers(suppliedHeaders);
-
-    if (body !== undefined) {
-        headers.set('Content-Type', 'application/json');
-    }
-    if (csrfToken) {
-        headers.set('X-CSRFToken', csrfToken);
-    }
-
-    const response = await fetch(`${API_BASE_URL}/connect/${path}`, {
-        ...fetchOptions,
-        headers,
-        credentials: 'include',
-        body: body === undefined ? undefined : JSON.stringify(body),
-    });
-
-    if (response.status === 204) {
-        return null;
-    }
-
-    let payload;
-    try {
-        payload = await response.json();
-    } catch (parseError) {
-        if (!response.ok) {
-            throw new Error(`Request failed (${response.status}).`);
-        }
-        throw parseError;
-    }
-    if (!response.ok) {
-        if (payload && typeof payload.detail === 'string') {
-            throw new Error(payload.detail);
-        }
-        const details = payload && typeof payload === 'object'
-            ? Object.values(payload)
-                .flat()
-                .map((detail) => (
-                    typeof detail === 'string' ? detail : JSON.stringify(detail)
-                ))
-            : [];
-        throw new Error(details.join(' ') || `Request failed (${response.status}).`);
-    }
-
-    return payload;
-}
+import { connectApi, GOOGLE_LOGIN_URL } from '../api/client';
 
 const ConnectPage = () => {
     const [loading, setLoading] = useState(true);
@@ -79,16 +20,13 @@ const ConnectPage = () => {
     const scanInProgressRef = useRef(false);
 
     const refreshConnections = useCallback(async () => {
-        const result = await apiRequest('connections/');
+        const result = await connectApi.getConnections();
         setUser(result.user);
         setConnections(result.connections);
     }, []);
 
     const createQrToken = useCallback(async (token) => {
-        const result = await apiRequest('qr-token/', {
-            method: 'POST',
-            csrfToken: token,
-        });
+        const result = await connectApi.createQrToken(token);
         setQrToken(result.token);
     }, []);
 
@@ -97,7 +35,7 @@ const ConnectPage = () => {
 
         async function initialize() {
             try {
-                const session = await apiRequest('session/');
+                const session = await connectApi.getSession();
                 if (cancelled) return;
 
                 setAuthenticated(session.authenticated);
@@ -107,11 +45,8 @@ const ConnectPage = () => {
 
                 if (session.authenticated) {
                     const [connectionResult, qrResult] = await Promise.all([
-                        apiRequest('connections/'),
-                        apiRequest('qr-token/', {
-                            method: 'POST',
-                            csrfToken: session.csrf_token,
-                        }),
+                        connectApi.getConnections(),
+                        connectApi.createQrToken(session.csrf_token),
                     ]);
                     if (cancelled) return;
                     setUser(connectionResult.user);
@@ -143,11 +78,7 @@ const ConnectPage = () => {
         setMessage('');
 
         try {
-            const result = await apiRequest('scan/', {
-                method: 'POST',
-                csrfToken,
-                body: { token },
-            });
+            const result = await connectApi.scanQrCode(token, csrfToken);
             await refreshConnections();
             setMessage(
                 result.created
@@ -213,10 +144,7 @@ const ConnectPage = () => {
     const handleLogout = async () => {
         setError('');
         try {
-            await apiRequest('logout/', {
-                method: 'POST',
-                csrfToken,
-            });
+            await connectApi.logout(csrfToken);
             setAuthenticated(false);
             setUser(null);
             setConnections([]);
@@ -278,7 +206,7 @@ const ConnectPage = () => {
                         <form
                             className="connectOAuthForm"
                             method="post"
-                            action={`${BACKEND_ORIGIN}/accounts/google/login/`}
+                            action={GOOGLE_LOGIN_URL}
                         >
                             <input
                                 type="hidden"

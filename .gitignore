@@ -8,6 +8,7 @@ frontend/.DS_Store
 backend/__pycache__/
 backend/*.pyc
 backend/db.sqlite3
+backend/staticfiles/
 backend/.venv/
 backend/venv/
 backend/env/

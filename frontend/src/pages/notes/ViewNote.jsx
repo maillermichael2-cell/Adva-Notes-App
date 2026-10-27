@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { notesApi } from '../../api/client';
 
 const ViewNote = () => {
     const { id } = useParams();
@@ -10,9 +11,7 @@ const ViewNote = () => {
     useEffect(() => {
         const fetchFullNote = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/V1/notes/${id}/`);
-                if (!response.ok) throw new Error(`Data retrieval failed: code ${response.status}`);
-                setNote(await response.json());
+                setNote(await notesApi.get(id));
             } catch (err) {
                 setError(err.message);
             } finally {
