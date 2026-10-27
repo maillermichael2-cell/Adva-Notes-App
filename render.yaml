@@ -2,6 +2,7 @@ services:
   - type: web
     name: api-practice-backend
     runtime: python
+    plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: python manage.py migrate --noinput && gunicorn OS.wsgi:application --bind 0.0.0.0:$PORT
