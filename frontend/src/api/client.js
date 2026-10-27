@@ -8,29 +8,16 @@ export const BACKEND_ORIGIN = (
 
 export const GOOGLE_LOGIN_URL = `${BACKEND_ORIGIN}/accounts/google/login/`;
 
-async function request(path, options = {}) {
-    const {
-        body,
-        csrfToken,
-        headers: suppliedHeaders,
-        ...fetchOptions
-    } = options;
-    const headers = new Headers(suppliedHeaders);
+let accessToken = null;
+let refreshRequest = null;
 
-    if (body !== undefined) {
-        headers.set('Content-Type', 'application/json');
-    }
-    if (csrfToken) {
-        headers.set('X-CSRFToken', csrfToken);
-    }
+function createRequestError(message, status) {
+    const error = new Error(message);
+    error.status = status;
+    return error;
+}
 
-    const response = await fetch(`${API_BASE_URL}/${path.replace(/^\/+/, '')}`, {
-        ...fetchOptions,
-        headers,
-        credentials: 'include',
-        body: body === undefined ? undefined : JSON.stringify(body),
-    });
-
+async function readResponse(response) {
     if (response.status === 204) {
         return null;
     }
@@ -40,14 +27,14 @@ async function request(path, options = {}) {
         payload = await response.json();
     } catch (parseError) {
         if (!response.ok) {
-            throw new Error(`Request failed (${response.status}).`);
+            throw createRequestError(`Request failed (${response.status}).`, response.status);
         }
         throw parseError;
     }
 
     if (!response.ok) {
         if (payload && typeof payload.detail === 'string') {
-            throw new Error(payload.detail);
+            throw createRequestError(payload.detail, response.status);
         }
         const details = payload && typeof payload === 'object'
             ? Object.values(payload)
@@ -56,26 +43,97 @@ async function request(path, options = {}) {
                     typeof detail === 'string' ? detail : JSON.stringify(detail)
                 ))
             : [];
-        throw new Error(details.join(' ') || `Request failed (${response.status}).`);
+        throw createRequestError(
+            details.join(' ') || `Request failed (${response.status}).`,
+            response.status,
+        );
     }
 
     return payload;
 }
 
-async function requestWithCsrf(path, options) {
-    const session = await request('connect/session/');
-    return request(path, { ...options, csrfToken: session.csrf_token });
+async function refreshAccessToken() {
+    if (!refreshRequest) {
+        refreshRequest = fetch(`${API_BASE_URL}/connect/token/refresh/`, {
+            method: 'POST',
+            credentials: 'include',
+        })
+            .then(readResponse)
+            .then((payload) => {
+                accessToken = payload.access;
+                return accessToken;
+            })
+            .finally(() => {
+                refreshRequest = null;
+            });
+    }
+
+    return refreshRequest;
+}
+
+async function request(path, options = {}, retryAfterRefresh = true) {
+    const {
+        body,
+        csrfToken,
+        authenticated = true,
+        headers: suppliedHeaders,
+        ...fetchOptions
+    } = options;
+    const headers = new Headers(suppliedHeaders);
+
+    if (authenticated && !accessToken) {
+        try {
+            await refreshAccessToken();
+        } catch (error) {
+            if (error.status === 401) {
+                throw createRequestError('You must sign in to continue.', 401);
+            }
+            throw error;
+        }
+    }
+
+    if (body !== undefined) {
+        headers.set('Content-Type', 'application/json');
+    }
+    if (csrfToken) {
+        headers.set('X-CSRFToken', csrfToken);
+    }
+    if (authenticated) {
+        headers.set('Authorization', `Bearer ${accessToken}`);
+    }
+
+    const response = await fetch(`${API_BASE_URL}/${path.replace(/^\/+/, '')}`, {
+        ...fetchOptions,
+        headers,
+        credentials: 'include',
+        body: body === undefined ? undefined : JSON.stringify(body),
+    });
+
+    if (response.status === 401 && authenticated && retryAfterRefresh) {
+        accessToken = null;
+        try {
+            await refreshAccessToken();
+        } catch (error) {
+            if (error.status === 401) {
+                throw createRequestError('Your sign-in has expired. Please sign in again.', 401);
+            }
+            throw error;
+        }
+        return request(path, options, false);
+    }
+
+    return readResponse(response);
 }
 
 export const notesApi = {
     list: () => request('notes/'),
     get: (id) => request(`notes/${id}/`),
-    create: (note) => requestWithCsrf('notes/', { method: 'POST', body: note }),
-    update: (id, note) => requestWithCsrf(`notes/${id}/`, {
+    create: (note) => request('notes/', { method: 'POST', body: note }),
+    update: (id, note) => request(`notes/${id}/`, {
         method: 'PUT',
         body: note,
     }),
-    delete: (id) => requestWithCsrf(`notes/${id}/`, { method: 'DELETE' }),
+    delete: (id) => request(`notes/${id}/`, { method: 'DELETE' }),
 };
 
 export const chatApi = {
@@ -88,22 +146,49 @@ export const chatApi = {
         url.search = '';
         return url.toString();
     },
+    getWebSocketProtocols: async () => {
+        if (!accessToken) {
+            await refreshAccessToken();
+        }
+        return ['bearer', accessToken];
+    },
 };
 
 export const connectApi = {
-    getSession: () => request('connect/session/'),
+    getSession: async () => {
+        let session = await request('connect/session/', { authenticated: false });
+
+        if (session.authenticated) {
+            const tokens = await request('connect/token/', {
+                method: 'POST',
+                csrfToken: session.csrf_token,
+                authenticated: false,
+            });
+            accessToken = tokens.access;
+            return session;
+        }
+
+        try {
+            await refreshAccessToken();
+        } catch (error) {
+            if (error.status !== 401) {
+                throw error;
+            }
+        }
+
+        if (accessToken) {
+            session = await request('connect/session/');
+        }
+        return session;
+    },
     getConnections: () => request('connect/connections/'),
-    createQrToken: (csrfToken) => request('connect/qr-token/', {
+    createQrToken: () => request('connect/qr-token/', { method: 'POST' }),
+    scanQrCode: (token) => request('connect/scan/', {
         method: 'POST',
-        csrfToken,
-    }),
-    scanQrCode: (token, csrfToken) => request('connect/scan/', {
-        method: 'POST',
-        csrfToken,
         body: { token },
     }),
-    logout: (csrfToken) => request('connect/logout/', {
-        method: 'POST',
-        csrfToken,
-    }),
+    logout: async () => {
+        await request('connect/logout/', { method: 'POST' });
+        accessToken = null;
+    },
 };

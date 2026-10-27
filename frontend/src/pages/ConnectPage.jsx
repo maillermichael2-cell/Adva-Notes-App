@@ -25,8 +25,8 @@ const ConnectPage = () => {
         setConnections(result.connections);
     }, []);
 
-    const createQrToken = useCallback(async (token) => {
-        const result = await connectApi.createQrToken(token);
+    const createQrToken = useCallback(async () => {
+        const result = await connectApi.createQrToken();
         setQrToken(result.token);
     }, []);
 
@@ -46,7 +46,7 @@ const ConnectPage = () => {
                 if (session.authenticated) {
                     const [connectionResult, qrResult] = await Promise.all([
                         connectApi.getConnections(),
-                        connectApi.createQrToken(session.csrf_token),
+                        connectApi.createQrToken(),
                     ]);
                     if (cancelled) return;
                     setUser(connectionResult.user);
@@ -78,7 +78,7 @@ const ConnectPage = () => {
         setMessage('');
 
         try {
-            const result = await connectApi.scanQrCode(token, csrfToken);
+            const result = await connectApi.scanQrCode(token);
             await refreshConnections();
             setMessage(
                 result.created
@@ -91,7 +91,7 @@ const ConnectPage = () => {
         } finally {
             scanInProgressRef.current = false;
         }
-    }, [csrfToken, refreshConnections]);
+    }, [refreshConnections]);
 
     scanHandlerRef.current = handleScan;
 
@@ -144,7 +144,7 @@ const ConnectPage = () => {
     const handleLogout = async () => {
         setError('');
         try {
-            await connectApi.logout(csrfToken);
+            await connectApi.logout();
             setAuthenticated(false);
             setUser(null);
             setConnections([]);
@@ -158,7 +158,7 @@ const ConnectPage = () => {
     const handleRefreshQr = async () => {
         setError('');
         try {
-            await createQrToken(csrfToken);
+            await createQrToken();
         } catch (requestError) {
             setError(requestError.message);
         }

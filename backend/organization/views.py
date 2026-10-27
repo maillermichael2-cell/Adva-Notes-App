@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from .seralizers import NotesSerializer
+
 from .models import Notes
+from .serializers import NotesSerializer
 
 # Create your views here.
 

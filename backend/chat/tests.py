@@ -1,9 +1,9 @@
 from asgiref.sync import async_to_sync
 from channels.testing import WebsocketCommunicator
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase, TransactionTestCase
+from django.test import TestCase, TransactionTestCase
 from rest_framework.test import APIClient
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from OS.asgi import application
 from connect.models import Connection
@@ -95,19 +95,14 @@ class ChatWebSocketTests(TransactionTestCase):
         )
 
     def communicator_for(self, user, peer_id):
-        client = Client()
-        client.force_login(user)
-        session_key = client.cookies[settings.SESSION_COOKIE_NAME].value
+        access_token = str(RefreshToken.for_user(user).access_token)
         return WebsocketCommunicator(
             application,
             f'/ws/chat/{peer_id}/',
             headers=[
                 (b'origin', b'http://localhost:3000'),
-                (
-                    b'cookie',
-                    f'{settings.SESSION_COOKIE_NAME}={session_key}'.encode(),
-                ),
             ],
+            subprotocols=['bearer', access_token],
         )
 
     def test_authenticated_connected_users_exchange_persisted_messages(self):

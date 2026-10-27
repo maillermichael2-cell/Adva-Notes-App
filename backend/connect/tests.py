@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core import signing
 from django.test import Client, TestCase, override_settings
 from rest_framework.test import APIClient
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Connection
 from .views import QR_TOKEN_SALT
@@ -144,7 +145,44 @@ class ConnectionApiTests(TestCase):
         ):
             with self.subTest(url=url):
                 response = method(url, {}, format='json')
-                self.assertEqual(response.status_code, 403)
+                self.assertIn(response.status_code, (401, 403))
+
+    def test_api_accepts_bearer_token_without_a_session(self):
+        access_token = str(RefreshToken.for_user(self.alice).access_token)
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f'Bearer {access_token}')
+
+        response = client.get('/api/V1/connect/connections/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('sessionid', client.cookies)
+
+    def test_session_exchange_issues_refresh_cookie_and_stateless_access_token(self):
+        client = APIClient()
+        client.force_authenticate(user=self.alice)
+
+        response = client.post('/api/V1/connect/token/', {}, format='json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data['access'])
+        self.assertTrue(response.cookies['refresh_token']['httponly'])
+        self.assertEqual(response.cookies['refresh_token']['path'], '/api/V1/connect/token/')
+
+        client.force_authenticate(user=None)
+        client.credentials(HTTP_AUTHORIZATION=f"Bearer {response.data['access']}")
+        protected_response = client.get('/api/V1/connect/connections/')
+        self.assertEqual(protected_response.status_code, 200)
+
+    def test_refresh_endpoint_returns_access_token_from_cookie(self):
+        refresh_token = str(RefreshToken.for_user(self.alice))
+        client = APIClient()
+        client.cookies['refresh_token'] = refresh_token
+
+        response = client.post('/api/V1/connect/token/refresh/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data['access'])
+        self.assertNotIn('refresh', response.data)
 
     @override_settings(
         SOCIALACCOUNT_PROVIDERS={

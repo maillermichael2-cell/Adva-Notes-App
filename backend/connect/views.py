@@ -16,6 +16,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Connection
 from .serializers import (
@@ -30,7 +33,10 @@ QR_TOKEN_SALT = 'connect.user-qr'
 
 @ensure_csrf_cookie
 @api_view(['GET'])
-@authentication_classes([SessionAuthentication])
+@authentication_classes([
+    JWTAuthentication,
+    SessionAuthentication,
+])
 @permission_classes([AllowAny])
 def session_status(request):
     user = (
@@ -46,8 +52,47 @@ def session_status(request):
     })
 
 
-class ConnectionListView(APIView):
+class SessionTokenView(APIView):
     authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        refresh = RefreshToken.for_user(request.user)
+        response = Response({'access': str(refresh.access_token)})
+        response.set_cookie(
+            settings.JWT_REFRESH_COOKIE_NAME,
+            str(refresh),
+            max_age=int(settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()),
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite=settings.JWT_REFRESH_COOKIE_SAMESITE,
+            path=settings.JWT_REFRESH_COOKIE_PATH,
+        )
+        logout(request)
+        return response
+
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def refresh_access_token(request):
+    refresh = request.COOKIES.get(settings.JWT_REFRESH_COOKIE_NAME)
+    if not refresh:
+        return Response(
+            {'detail': 'Refresh token is required.'},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    serializer = TokenRefreshSerializer(data={'refresh': refresh})
+    if not serializer.is_valid():
+        return Response(
+            {'detail': 'Refresh token is invalid or expired.'},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+    return Response({'access': serializer.validated_data['access']})
+
+
+class ConnectionListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -65,7 +110,6 @@ class ConnectionListView(APIView):
 
 
 class CreateQrTokenView(APIView):
-    authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -80,7 +124,6 @@ class CreateQrTokenView(APIView):
 
 
 class ScanQrCodeView(APIView):
-    authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -130,8 +173,13 @@ class ScanQrCodeView(APIView):
 
 
 @api_view(['POST'])
-@authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def logout_view(request):
     logout(request)
-    return Response(status=status.HTTP_204_NO_CONTENT)
+    response = Response(status=status.HTTP_204_NO_CONTENT)
+    response.delete_cookie(
+        settings.JWT_REFRESH_COOKIE_NAME,
+        path=settings.JWT_REFRESH_COOKIE_PATH,
+        samesite=settings.JWT_REFRESH_COOKIE_SAMESITE,
+    )
+    return response

@@ -61,9 +61,14 @@ const ChatPage = () => {
                 if (!active) return;
                 setMessages(history);
 
-                const connect = () => {
+                const connect = async () => {
                     if (!active) return;
-                    socket = new WebSocket(chatApi.getWebSocketUrl(peerId));
+                    const protocols = await chatApi.getWebSocketProtocols();
+                    if (!active) return;
+                    socket = new WebSocket(
+                        chatApi.getWebSocketUrl(peerId),
+                        protocols,
+                    );
                     socketRef.current = socket;
 
                     socket.onopen = () => {
