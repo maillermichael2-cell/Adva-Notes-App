@@ -17,24 +17,28 @@ function createRequestError(message, status) {
     return error;
 }
 
-async function readResponse(response) {
+async function readResponse(response, method, path) {
     if (response.status === 204) {
         return null;
     }
 
+    const requestLabel = `${method} ${path}`;
     let payload;
     try {
         payload = await response.json();
     } catch (parseError) {
         if (!response.ok) {
-            throw createRequestError(`Request failed (${response.status}).`, response.status);
+            throw createRequestError(
+                `${requestLabel} failed (${response.status}).`,
+                response.status,
+            );
         }
         throw parseError;
     }
 
     if (!response.ok) {
         if (payload && typeof payload.detail === 'string') {
-            throw createRequestError(payload.detail, response.status);
+            throw createRequestError(`${requestLabel}: ${payload.detail}`, response.status);
         }
         const details = payload && typeof payload === 'object'
             ? Object.values(payload)
@@ -44,7 +48,7 @@ async function readResponse(response) {
                 ))
             : [];
         throw createRequestError(
-            details.join(' ') || `Request failed (${response.status}).`,
+            `${requestLabel}: ${details.join(' ') || `request failed (${response.status})`}`,
             response.status,
         );
     }
@@ -58,7 +62,11 @@ async function refreshAccessToken() {
             method: 'POST',
             credentials: 'include',
         })
-            .then(readResponse)
+            .then((response) => readResponse(
+                response,
+                'POST',
+                'connect/token/refresh/',
+            ))
             .then((payload) => {
                 accessToken = payload.access;
                 return accessToken;
@@ -122,7 +130,7 @@ async function request(path, options = {}, retryAfterRefresh = true) {
         return request(path, options, false);
     }
 
-    return readResponse(response);
+    return readResponse(response, fetchOptions.method || 'GET', path);
 }
 
 export const notesApi = {
