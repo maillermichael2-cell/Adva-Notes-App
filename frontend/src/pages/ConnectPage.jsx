@@ -5,6 +5,8 @@ import { connectApi, GOOGLE_LOGIN_URL } from '../api/client';
 
 const ConnectPage = () => {
     const [loading, setLoading] = useState(true);
+    const [sessionLoadFailed, setSessionLoadFailed] = useState(false);
+    const [sessionRetry, setSessionRetry] = useState(0);
     const [authenticated, setAuthenticated] = useState(false);
     const [googleConfigured, setGoogleConfigured] = useState(false);
     const [csrfToken, setCsrfToken] = useState('');
@@ -56,6 +58,7 @@ const ConnectPage = () => {
             } catch (requestError) {
                 if (!cancelled) {
                     setError(requestError.message);
+                    setSessionLoadFailed(true);
                 }
             } finally {
                 if (!cancelled) {
@@ -68,7 +71,7 @@ const ConnectPage = () => {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [sessionRetry]);
 
     const handleScan = useCallback(async (token) => {
         if (scanInProgressRef.current) return;
@@ -197,7 +200,25 @@ const ConnectPage = () => {
             {error && <div className="connectNotice connectError" role="alert">{error}</div>}
             {message && <div className="connectNotice connectSuccess" role="status">{message}</div>}
 
-            {!authenticated ? (
+            {sessionLoadFailed ? (
+                <section className="connectPanel connectSignIn">
+                    <span className="techMeta">// CONNECTION_ERROR</span>
+                    <h2>Could not load account status</h2>
+                    <p>Check your connection, then retry. Your sign-in configuration has not been verified yet.</p>
+                    <button
+                        className="actionButton"
+                        onClick={() => {
+                            setError('');
+                            setSessionLoadFailed(false);
+                            setLoading(true);
+                            setSessionRetry((retry) => retry + 1);
+                        }}
+                        type="button"
+                    >
+                        Retry
+                    </button>
+                </section>
+            ) : !authenticated ? (
                 <section className="connectPanel connectSignIn">
                     <span className="techMeta">// ACCOUNT_REQUIRED</span>
                     <h2>Sign in to connect</h2>
