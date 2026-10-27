@@ -4,16 +4,12 @@ services:
     runtime: python
     plan: free
     rootDir: backend
-    buildCommand: pip install -r requirements.txt && REQUIRE_SHARED_SERVICES=False python manage.py collectstatic --noinput
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: python manage.py migrate --noinput && daphne -b 0.0.0.0 -p $PORT OS.asgi:application
     envVars:
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DEBUG
-        value: "False"
-      - key: REQUIRE_SHARED_SERVICES
-        value: "True"
-      - key: REQUIRE_REDIS
         value: "False"
       - key: DATABASE_URL
         sync: false
