@@ -5,13 +5,18 @@ services:
     plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
-    startCommand: python manage.py migrate --noinput && daphne -b 0.0.0.0 -p $PORT OS.asgi:application
+    preDeployCommand: python manage.py migrate --noinput
+    startCommand: daphne -b 0.0.0.0 -p $PORT OS.asgi:application
     envVars:
       - key: DJANGO_SECRET_KEY
         generateValue: true
       - key: DEBUG
         value: "False"
+      - key: REQUIRE_SHARED_SERVICES
+        value: "True"
       - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
         sync: false
       - key: FRONTEND_URL
         value: https://adva-tools.onrender.com

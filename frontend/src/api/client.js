@@ -147,9 +147,7 @@ export const chatApi = {
         return url.toString();
     },
     getWebSocketProtocols: async () => {
-        if (!accessToken) {
-            await refreshAccessToken();
-        }
+        await refreshAccessToken();
         return ['bearer', accessToken];
     },
 };

@@ -63,12 +63,30 @@ const ChatPage = () => {
 
                 const connect = async () => {
                     if (!active) return;
-                    const protocols = await chatApi.getWebSocketProtocols();
+                    let protocols;
+                    try {
+                        protocols = await chatApi.getWebSocketProtocols();
+                    } catch (requestError) {
+                        if (!active) return;
+                        setError(requestError.message);
+                        if (requestError.status !== 401) {
+                            retryCount += 1;
+                            const delay = Math.min(1000 * (2 ** (retryCount - 1)), 10000);
+                            reconnectTimer = window.setTimeout(connect, delay);
+                        }
+                        return;
+                    }
                     if (!active) return;
-                    socket = new WebSocket(
-                        chatApi.getWebSocketUrl(peerId),
-                        protocols,
-                    );
+
+                    try {
+                        socket = new WebSocket(
+                            chatApi.getWebSocketUrl(peerId),
+                            protocols,
+                        );
+                    } catch (socketError) {
+                        setError(socketError.message || 'Could not start the chat connection.');
+                        return;
+                    }
                     socketRef.current = socket;
 
                     socket.onopen = () => {
