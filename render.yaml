@@ -14,13 +14,13 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: FRONTEND_URL
-        value: https://adva-tools-frontend.onrender.com
+        value: https://adva-tools.onrender.com
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
   - type: web
-    name: api-practice-frontend
+    name: adva-tools
     runtime: static
     rootDir: frontend
     buildCommand: npm ci && npm run build
