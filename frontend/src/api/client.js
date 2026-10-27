@@ -78,6 +78,18 @@ export const notesApi = {
     delete: (id) => requestWithCsrf(`notes/${id}/`, { method: 'DELETE' }),
 };
 
+export const chatApi = {
+    getConversations: () => request('chat/conversations/'),
+    getMessages: (peerId) => request(`chat/conversations/${peerId}/messages/`),
+    getWebSocketUrl: (peerId) => {
+        const url = new URL(API_BASE_URL);
+        url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+        url.pathname = `/ws/chat/${peerId}/`;
+        url.search = '';
+        return url.toString();
+    },
+};
+
 export const connectApi = {
     getSession: () => request('connect/session/'),
     getConnections: () => request('connect/connections/'),

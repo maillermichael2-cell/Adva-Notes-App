@@ -10,7 +10,7 @@ const LandingPage = () => {
                 <Link className="link">Feeds</Link>
                 <Link className="link">Find Friends</Link>
                 <Link to="/connect" className="link">Sign in / Connect by QR</Link>
-                <Link className="link">Chat</Link>
+                <Link to="/chat" className="link">Chat</Link>
                 <Link className="link">Maps</Link>
             </div>
         </div>

@@ -110,6 +110,22 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'OS.wsgi.application'
+ASGI_APPLICATION = 'OS.asgi.application'
+
+REDIS_URL = env('REDIS_URL', default='')
+if REDIS_URL and not RUNNING_TESTS:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {'hosts': [REDIS_URL]},
+        }
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        }
+    }
 
 
 # Database

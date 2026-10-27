@@ -76,4 +76,33 @@
   .connectPanel {
     padding: 1.5rem;
   }
+
+  .chatHeader {
+    flex-direction: column;
+  }
+
+  .chatLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .chatContacts {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-fine);
+  }
+
+  .chatContacts h2 {
+    display: none;
+  }
+
+  .chatContact {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .chatContactText {
+    display: none;
+  }
 }
